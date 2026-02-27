@@ -14,7 +14,6 @@ class Atom(ABC):
         transition_frequency: The frequency of the relevant atomic transition (Hz).
     """
     name: str
-    transition_frequency: float  # Hz
     
     @abstractmethod
     def zeeman_shift(self, B: float) -> float:

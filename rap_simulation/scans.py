@@ -90,21 +90,21 @@ def sweep_time_scan(
         # Create modified parameters
         if constant_freq_span is not None:
             # Keep total frequency span constant
-            delta_span = 2 * np.pi * constant_freq_span / (2 * sweep_time)
+            freq_span = constant_freq_span
         else:
             # Scale delta_span with sweep_time to maintain the same rate
-            delta_span = base_params.delta_span * (base_params.sweep_time / sweep_time)
+            freq_span = base_params.freq_span * (base_params.sweep_time / sweep_time)
         
         # Ensure T is long enough for the sweep
-        T = max(base_params.T, 4 * sweep_time)
+        T = max(base_params.T, sweep_time)
         
         params = SimulationParams(
             T=T,
             dt=base_params.dt,
             omega=base_params.omega,
             sweep_time=sweep_time,
-            delta_span=delta_span,
-            span_center=base_params.span_center,
+            freq_span=freq_span,
+            freq_span_center=base_params.freq_span_center,
         )
         
         rap = RapidAdiabaticPassage(atom, params)
@@ -156,15 +156,14 @@ def frequency_span_scan(
     iterator = tqdm(enumerate(freq_spans), total=n_points, desc="Frequency span scan") if show_progress else enumerate(freq_spans)
     
     for i, freq_span in iterator:
-        delta_span = 2 * np.pi * freq_span / (2 * base_params.sweep_time)
         
         params = SimulationParams(
             T=base_params.T,
             dt=base_params.dt,
             omega=base_params.omega,
             sweep_time=base_params.sweep_time,
-            delta_span=delta_span,
-            span_center=base_params.span_center,
+            freq_span=freq_span,
+            freq_span_center=base_params.freq_span_center,
         )
         
         rap = RapidAdiabaticPassage(atom, params)

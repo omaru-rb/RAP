@@ -35,8 +35,8 @@ class SimulationParams:
     dt: float
     omega: float
     sweep_time: float
-    delta_span: float
-    span_center: float = 0.0
+    freq_span: float
+    freq_span_center: float = 0.0
     t_center: float | None = None
     
     def __post_init__(self):
@@ -44,6 +44,20 @@ class SimulationParams:
             self.t_center = self.T / 2
     
     @classmethod
+    def from_atom(cls, T:float,dt:float, omega:float, sweep_time:float, freq_span:float, freq_span_center:float) -> "SimulationParams":
+        """
+        Create parameters
+        """
+        return cls(
+            T = T,
+            dt = dt,
+            omega = omega,
+            sweep_time = sweep_time,
+            freq_span_center = freq_span_center,
+            freq_span = freq_span,
+        )
+    
+    @classmethod   # TODO: fix this method
     def for_rb87_clock(
         cls,
         T: float = 1e-3,
@@ -88,8 +102,8 @@ class SimulationParams:
             't_center': self.t_center,
             'omega': self.omega,
             'sweep_time': self.sweep_time,
-            'delta_span': self.delta_span,
-            'span_center': self.span_center,
+            'freq_span': self.freq_span,
+            'freq_span_center': self.freq_span_center,
         }
 
 
@@ -227,11 +241,11 @@ class RapidAdiabaticPassage:
         
         def delta_coeff(t, args):
             return detuning_func(
-                t,
-                args['t_center'],
-                args['delta_span'],
-                args['span_center'],
-                args['sweep_time'],
+                t= t,
+                t_center= args['t_center'],
+                freq_span= args['freq_span'],
+                freq_span_center= args['freq_span_center'],
+                sweep_time= args['sweep_time'],
                 **detuning_kwargs
             )
         

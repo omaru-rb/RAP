@@ -121,9 +121,9 @@ def pulse_gaussian(
         sigma: Width parameter. Defaults to sweep_time/3 for ~99% within window.
     """
     if sigma is None:
-        sigma = sweep_time / 3
+        sigma = sweep_time / 6
         
-    if abs(t - t_center) > sweep_time:
+    if abs(t - t_center) > sweep_time/2:
         return 1.0
     return omega * np.exp(-(t - t_center)**2 / (2 * sigma**2))
 
@@ -144,7 +144,7 @@ def pulse_lorentzian(
         gamma: Half-width at half-maximum. Defaults to 0.1 * sweep_time.
     """
     if gamma is None:
-        gamma = 0.1 * sweep_time
+        gamma = 0.05 * sweep_time
         
     if abs(t - t_center) > sweep_time:
         return 1.0

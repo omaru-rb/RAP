@@ -88,8 +88,8 @@ def list_detunings() -> list[str]:
 def detuning_linear(
     t: float,
     t_center: float,
-    delta_span: float,
-    span_center: float,
+    freq_span: float,
+    freq_span_center: float,
     sweep_time: float,
     **kwargs
 ) -> float:
@@ -100,13 +100,14 @@ def detuning_linear(
     +delta_span*sweep_time over the sweep window.
     """
     dt = t - t_center
+    slope = freq_span / sweep_time
     
-    if dt < -sweep_time:
-        return delta_span * (-sweep_time) + span_center
-    elif dt > sweep_time:
-        return delta_span * sweep_time + span_center
+    if dt < -sweep_time/2:
+        return  freq_span_center - slope * sweep_time/2
+    elif dt > sweep_time/2:
+        return freq_span_center + slope * sweep_time/2
     else:
-        return delta_span * dt + span_center
+        return freq_span_center + slope * dt
 
 
 @register_detuning("tanh")

@@ -5,7 +5,7 @@ This package provides tools for simulating and visualizing rapid adiabatic passa
 experiments using QuTiP for quantum dynamics calculations.
 """
 
-from .atoms import Atom, Rubidium87
+from .atoms import Atom, Rubidium87, HyperfineState, Transition
 from .simulation import RapidAdiabaticPassage, SimulationParams, SimulationResult
 from .pulses import get_pulse, list_pulses
 from .detuning import get_detuning, list_detunings
@@ -18,6 +18,8 @@ __all__ = [
     # Atoms
     "Atom",
     "Rubidium87",
+    "HyperfineState",
+    "Transition",
     # Simulation
     "RapidAdiabaticPassage",
     "SimulationParams",

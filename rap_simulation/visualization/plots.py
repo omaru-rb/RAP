@@ -97,7 +97,7 @@ def plot_pulse_and_detuning(
     ]) / (2 * np.pi) * freq_scale
     
     delta = np.array([
-        detuning_func(t, params.t_center, params.delta_span, params.span_center, params.sweep_time)
+        detuning_func(t, params.t_center, params.freq_span, params.freq_span_center, params.sweep_time)
         for t in result.times
     ]) / (2 * np.pi) * freq_scale
     
@@ -272,7 +272,7 @@ def plot_combined(
     ]) / (2 * np.pi * 1e3)  # Convert to kHz
     
     delta = np.array([
-        detuning_func(t, params.t_center, params.delta_span, params.span_center, params.sweep_time)
+        detuning_func(t, params.t_center, params.freq_span, params.freq_span_center, params.sweep_time)
         for t in result.times
     ]) / (2 * np.pi * 1e3)  # Convert to kHz
     
