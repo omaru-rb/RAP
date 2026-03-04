@@ -6,9 +6,10 @@ experiments using QuTiP for quantum dynamics calculations.
 """
 
 from .atoms import Atom, Rubidium87, HyperfineState, Transition
-from .simulation import RapidAdiabaticPassage, SimulationParams, SimulationResult
+from .simulation import CompositePulse, SimulationParams, SimulationResult
 from .pulses import get_pulse, list_pulses
 from .detuning import get_detuning, list_detunings
+from .phase import get_phase, list_phase
 from .analysis import adiabaticity_criterion, compute_bloch_trajectory
 from .scans import sweep_time_scan, frequency_span_scan, spectroscopy_scan
 
@@ -21,7 +22,7 @@ __all__ = [
     "HyperfineState",
     "Transition",
     # Simulation
-    "RapidAdiabaticPassage",
+    "CompositePulse",
     "SimulationParams",
     "SimulationResult",
     # Pulses & Detuning
@@ -29,6 +30,8 @@ __all__ = [
     "list_pulses",
     "get_detuning",
     "list_detunings",
+    "get_phase",
+    "list_phase",
     # Analysis
     "adiabaticity_criterion",
     "compute_bloch_trajectory",

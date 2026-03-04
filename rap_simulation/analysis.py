@@ -11,6 +11,7 @@ import numpy as np
 
 from .pulses import get_pulse
 from .detuning import get_detuning
+from.phase import get_phase
 
 if TYPE_CHECKING:
     from .simulation import SimulationParams, SimulationResult

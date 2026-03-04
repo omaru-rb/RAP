@@ -84,6 +84,22 @@ def list_detunings() -> list[str]:
 # Built-in detuning sweeps
 # ============================================================================
 
+@register_detuning("constant")
+def detuning_constant(
+    t: float,
+    t_center: float,
+    freq: float,
+    sweep_time: float,
+    **kwargs
+) -> float:
+    """
+    Constant (rectangular) detuning.
+    
+    """
+    if abs(t - t_center) > sweep_time:
+        return 0
+    return freq
+
 @register_detuning("linear")
 def detuning_linear(
     t: float,

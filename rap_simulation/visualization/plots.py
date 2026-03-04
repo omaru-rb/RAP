@@ -57,7 +57,7 @@ def plot_probabilities(
     return fig
 
 
-def plot_pulse_and_detuning(
+def plot_pulse_detuning_and_phase(
     result: "SimulationResult",
     time_unit: str = "ms",
     freq_unit: str = "kHz",
@@ -79,6 +79,7 @@ def plot_pulse_and_detuning(
     """
     from ..pulses import get_pulse
     from ..detuning import get_detuning
+    from ..phase import get_phase
     
     time_scale = {'s': 1, 'ms': 1e3, 'us': 1e6}.get(time_unit, 1)
     freq_scale = {'Hz': 1, 'kHz': 1e-3, 'MHz': 1e-6}.get(freq_unit, 1)
@@ -89,6 +90,7 @@ def plot_pulse_and_detuning(
     # Get pulse and detuning functions
     pulse_func = get_pulse(result.pulse_name)
     detuning_func = get_detuning(result.detuning_name)
+    phase_func = get_phase(result.phase_name)
     
     # Calculate profiles
     omega = np.array([
@@ -100,11 +102,18 @@ def plot_pulse_and_detuning(
         detuning_func(t, params.t_center, params.freq_span, params.freq_span_center, params.sweep_time)
         for t in result.times
     ]) / (2 * np.pi) * freq_scale
+
+    phi = np.array([
+        phase_func(t, params.t_center, params.phase, params.sweep_time)
+        for t in result.times
+    ])
+
     
     fig, ax = plt.subplots(figsize=figsize)
-    
+
     ax.plot(times, omega, label=r'$\Omega(t)$ (Rabi freq.)', color='#3498db', linewidth=2)
     ax.plot(times, delta, label=r'$\Delta(t)$ (Detuning)', color='#9b59b6', linewidth=2)
+    ax.plot(times, phi, label=r'$\Phi(t)$ (Phasejjhfkdjhs)', color="#e97400", linewidth=2)
     
     ax.axhline(0, color='gray', linestyle='--', alpha=0.5)
     ax.set_xlabel(f'Time ({time_unit})', fontsize=12)

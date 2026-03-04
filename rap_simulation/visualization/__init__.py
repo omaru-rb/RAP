@@ -2,7 +2,7 @@
 
 from .plots import (
     plot_probabilities,
-    plot_pulse_and_detuning,
+    plot_pulse_detuning_and_phase,
     plot_adiabaticity,
     plot_expectation_values,
     plot_combined,
@@ -12,7 +12,7 @@ from .bloch_animation import animate_bloch, plot_bloch_trajectory
 
 __all__ = [
     "plot_probabilities",
-    "plot_pulse_and_detuning",
+    "plot_pulse_detuning_and_phase",
     "plot_adiabaticity",
     "plot_expectation_values",
     "plot_combined",
