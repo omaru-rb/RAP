@@ -86,6 +86,12 @@ def plot_pulse_detuning_and_phase(
     
     times = result.times * time_scale
     params = result.params
+    dic_params = {"sweep_time": params.sweep_time, 
+                  "t_center" : params.t_center, 
+                  "omega" : params.omega, 
+                  "theta" : params.theta,
+                  "overshoot" : params.overshoot,
+                  } 
     
     # Get pulse and detuning functions
     pulse_func = get_pulse(result.pulse_name)
@@ -104,7 +110,7 @@ def plot_pulse_detuning_and_phase(
     ]) / (2 * np.pi) * freq_scale
 
     phi = np.array([
-        phase_func(t, params.t_center, params.phase, params.sweep_time)
+        phase_func(t, dic_params)
         for t in result.times
     ])
 
@@ -113,7 +119,7 @@ def plot_pulse_detuning_and_phase(
 
     ax.plot(times, omega, label=r'$\Omega(t)$ (Rabi freq.)', color='#3498db', linewidth=2)
     ax.plot(times, delta, label=r'$\Delta(t)$ (Detuning)', color='#9b59b6', linewidth=2)
-    ax.plot(times, phi, label=r'$\Phi(t)$ (Phasejjhfkdjhs)', color="#e97400", linewidth=2)
+    ax.plot(times, phi, label=r'$\Phi(t)$ (Phase)', color="#e97400", linewidth=2)
     
     ax.axhline(0, color='gray', linestyle='--', alpha=0.5)
     ax.set_xlabel(f'Time ({time_unit})', fontsize=12)

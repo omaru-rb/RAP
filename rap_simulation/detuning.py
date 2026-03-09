@@ -88,7 +88,8 @@ def list_detunings() -> list[str]:
 def detuning_constant(
     t: float,
     t_center: float,
-    freq: float,
+    freq_span: float,
+    freq_span_center: float,
     sweep_time: float,
     **kwargs
 ) -> float:
@@ -96,9 +97,9 @@ def detuning_constant(
     Constant (rectangular) detuning.
     
     """
-    if abs(t - t_center) > sweep_time:
+    if abs(t - t_center) > sweep_time/2:
         return 0
-    return freq
+    return freq_span_center
 
 @register_detuning("linear")
 def detuning_linear(

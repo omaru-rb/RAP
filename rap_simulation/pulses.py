@@ -100,7 +100,7 @@ def pulse_constant(
     
     Returns omega during the sweep window, and a small baseline value outside.
     """
-    if abs(t - t_center) > sweep_time:
+    if abs(t - t_center) > sweep_time/2:
         return 1.0  # Small baseline to avoid division issues
     return omega
 

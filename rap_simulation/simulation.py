@@ -8,7 +8,7 @@ the quantum dynamics simulation using QuTiP.
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 import numpy as np
-from qutip import Qobj, basis, sesolve, sigmax, sigmaz, sigmay, expect, Result
+from qutip import Qobj, basis, sesolve, sigmax, sigmaz, sigmay, expect, Result, Options
 
 from .pulses import get_pulse
 from .detuning import get_detuning
@@ -36,18 +36,24 @@ class SimulationParams:
     T: float
     dt: float
     omega: float
-    phase : float
-    sweep_time: float
+    theta : float
     freq_span: float
     freq_span_center: float = 0.0
+    overshoot: float = 0.0
+    sweep_time: float | None = None
     t_center: float | None = None
     
     def __post_init__(self):
         if self.t_center is None:
             self.t_center = self.T / 2
+        if self.sweep_time is None:
+            self.sweep_time = (self.theta+4*np.pi)/self.omega
+        self.sweep_time = self.sweep_time + self.overshoot
+
+
     
     @classmethod
-    def from_atom(cls, T:float,dt:float, omega:float, phase:float, sweep_time:float, freq_span:float, freq_span_center:float) -> "SimulationParams":
+    def from_atom(cls, T:float,dt:float, omega:float, theta:float, overshoot: float, sweep_time:float, freq_span:float, freq_span_center:float) -> "SimulationParams":
         """
         Create parameters
         """
@@ -55,7 +61,8 @@ class SimulationParams:
             T = T,
             dt = dt,
             omega = omega,
-            phase=phase,
+            theta=theta,
+            overshoot=overshoot,
             sweep_time = sweep_time,
             freq_span_center = freq_span_center,
             freq_span = freq_span,
@@ -105,10 +112,11 @@ class SimulationParams:
             'dt': self.dt,
             't_center': self.t_center,
             'omega': self.omega,
+            'overshoot': self.overshoot,
             'sweep_time': self.sweep_time,
             'freq_span': self.freq_span,
             'freq_span_center': self.freq_span_center,
-            'phase' : self.phase,
+            'theta' : self.theta,
         }
 
 
@@ -137,10 +145,12 @@ class SimulationResult:
     probabilities: dict[str, np.ndarray]
     bloch_coords: dict[str, np.ndarray]
     params: SimulationParams
+    dict_params: dict
     pulse_name: str
     phase_name: str
     detuning_name: str
     qutip_result: Result
+    
     
     @property
     def p0(self) -> np.ndarray:
@@ -216,6 +226,12 @@ class CompositePulse:
         """
         self.atom = atom
         self.params = params
+        self.dict_params = {
+            "t_center": self.params.t_center,
+            "theta": self.params.theta,
+            "omega": self.params.omega,
+            "overshoot": self.params.overshoot,
+            }
         
         # Basis states
         self._psi0 = basis(2, 0)  # |0⟩
@@ -243,9 +259,9 @@ class CompositePulse:
         def omega_coeff(t, args):
             return pulse_func(
                 t,
-                args['t_center'],
-                args['omega'],
-                args['sweep_time'],
+                t_center= args['t_center'],
+                omega=args['omega'],
+                sweep_time=args['sweep_time'],
                 **pulse_kwargs
             )
         
@@ -261,9 +277,7 @@ class CompositePulse:
         def phase_coeff(t, args):
             return phase_func(
                 t,
-                args['t_center'],
-                args['phase'],
-                args['sweep_time'],
+                args,
                 **phase_kwargs
             )
 
@@ -308,7 +322,7 @@ class CompositePulse:
     def run(
         self,
         pulse: str = "constant",
-        detuning: str = "linear",
+        detuning: str = "constant",
         phase: str = "constant",
         initial_state: Qobj | None = None,
         pulse_kwargs: dict | None = None,
@@ -341,7 +355,10 @@ class CompositePulse:
         
         # Solve Schrödinger equation
         args = self.params.to_dict()
-        result = sesolve(H, initial_state, tlist, args=args)
+        opts = Options(max_step=1e-6)
+
+        result = sesolve(H, initial_state, tlist, args=args, options=opts)
+        
         
         # Extract state amplitudes
         c0 = np.array([self._psi0.dag() * state for state in result.states])
@@ -362,12 +379,13 @@ class CompositePulse:
             probabilities={'p0': p0, 'p1': p1},
             bloch_coords=bloch_coords,
             params=self.params,
+            dict_params=self.dict_params,
             pulse_name=pulse,
             detuning_name=detuning,
             phase_name=phase,
             qutip_result=result,
         )
-    
+        
     def get_pulse_profile(self, pulse: str, **kwargs) -> tuple[np.ndarray, np.ndarray]:
         """
         Get the pulse amplitude over time.
@@ -417,7 +435,7 @@ class CompositePulse:
         times = np.linspace(0, self.params.T, n_points)
         
         phases = np.array([
-            phase_func(t, self.params.t_center, self.params.phase, self.params.sweep_time, **kwargs)
+            phase_func(t, self.dict_params, **kwargs)
             for t in times
         ])
         return times, phases

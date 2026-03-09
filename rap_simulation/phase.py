@@ -16,9 +16,7 @@ class PhaseFunc(Protocol):
     def __call__(
         self,
         t: float,
-        t_center: float,
-        phase: float,
-        sweep_time: float,
+        args: dict,
         **kwargs
     ) -> float:
         """
@@ -90,17 +88,49 @@ def list_phase() -> list[str]:
 @register_phase("constant")
 def phase_constant(
     t: float,
-    t_center: float,
-    phase: float,
-    sweep_time: float,
+    args: dict,
     **kwargs
 ) -> float:
     """
     Constant (rectangular) phase profile.
     
     """
-    return phase
+    return np.pi/2
 
+@register_phase("BB1")
+def phase_BB1(
+    t: float,
+    args: dict,
+    **kwargs
+) -> float:
+    """
+    BB1 phase profile. Consists of 4 jumps in 
+    
+    """
+    phi=np.arccos(-args['theta']/(4*np.pi))
+    omega=args['omega']
+    Ttheta=args['theta']/omega + args['overshoot']/5
+    t_center=args['t_center']
+    sweep_time=args['sweep_time']
+    Tpi=np.pi/omega + args['overshoot']/5
+    t0 = t_center - (sweep_time)/2
+    t1 = t0 + Ttheta
+    t2 = t1 + Tpi
+    t3 = t2 + 2*Tpi
+    t4 = t3 + Tpi
+
+    if t < t1:
+        return 0
+    elif t < t2:
+        return phi
+    elif t < t3:
+        return 3*phi
+    elif t < t4:
+        return phi
+    else:
+        return 0
+    
+    
 
 
 
@@ -133,9 +163,7 @@ def make_phase_coefficients(
     def coefficient(t: float, args: dict) -> float:
         return phase_func(
             t,
-            args.get('t_center', t_center),
-            args.get('phase', phase),
-            args.get('sweep_time', sweep_time),
+            args,
             **kwargs
         )
     
