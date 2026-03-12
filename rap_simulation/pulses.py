@@ -17,7 +17,7 @@ class PulseFunc(Protocol):
         self,
         t: float,
         t_center: float,
-        omega: float,
+        omega_eff: float,
         sweep_time: float,
         **kwargs
     ) -> float:
@@ -91,7 +91,7 @@ def list_pulses() -> list[str]:
 def pulse_constant(
     t: float,
     t_center: float,
-    omega: float,
+    omega_eff: float,
     sweep_time: float,
     **kwargs
 ) -> float:
@@ -102,14 +102,14 @@ def pulse_constant(
     """
     if abs(t - t_center) > sweep_time/2:
         return 1.0  # Small baseline to avoid division issues
-    return omega
+    return omega_eff
 
 
 @register_pulse("gaussian")
 def pulse_gaussian(
     t: float,
     t_center: float,
-    omega: float,
+    omega_eff: float,
     sweep_time: float,
     sigma: float | None = None,
     **kwargs
@@ -125,14 +125,14 @@ def pulse_gaussian(
         
     if abs(t - t_center) > sweep_time/2:
         return 1.0
-    return omega * np.exp(-(t - t_center)**2 / (2 * sigma**2))
+    return omega_eff * np.exp(-(t - t_center)**2 / (2 * sigma**2))
 
 
 @register_pulse("lorentzian")
 def pulse_lorentzian(
     t: float,
     t_center: float,
-    omega: float,
+    omega_eff: float,
     sweep_time: float,
     gamma: float | None = None,
     **kwargs
@@ -148,14 +148,14 @@ def pulse_lorentzian(
         
     if abs(t - t_center) > sweep_time:
         return 1.0
-    return omega * gamma**2 / ((t - t_center)**2 + gamma**2)
+    return omega_eff * gamma**2 / ((t - t_center)**2 + gamma**2)
 
 
 @register_pulse("hyper_secant")
 def pulse_hyper_secant(
     t: float,
     t_center: float,
-    omega: float,
+    omega_eff: float,
     sweep_time: float,
     beta: float = 5.3,
     **kwargs
@@ -171,7 +171,7 @@ def pulse_hyper_secant(
     """
     if abs(t - t_center) > sweep_time:
         return 0.1  # Small but non-zero baseline
-    return omega / np.cosh(beta * (t - t_center) / sweep_time)
+    return omega_eff / np.cosh(beta * (t - t_center) / sweep_time)
 
 
 # ============================================================================
@@ -181,7 +181,7 @@ def pulse_hyper_secant(
 def make_pulse_coefficients(
     pulse_name: str,
     t_center: float,
-    omega: float,
+    omega_eff: float,
     sweep_time: float,
     **kwargs
 ) -> Callable[[float, dict], float]:
@@ -191,7 +191,7 @@ def make_pulse_coefficients(
     Args:
         pulse_name: Name of the registered pulse.
         t_center: Center of the pulse (s).
-        omega: Peak Rabi frequency (rad/s).
+        omega_eff: Peak Rabi frequency (rad/s).
         sweep_time: Half-duration of the sweep (s).
         **kwargs: Additional pulse parameters.
         
@@ -204,7 +204,7 @@ def make_pulse_coefficients(
         return pulse_func(
             t,
             args.get('t_center', t_center),
-            args.get('omega', omega),
+            args.get('omega_eff', omega_eff),
             args.get('sweep_time', sweep_time),
             **kwargs
         )

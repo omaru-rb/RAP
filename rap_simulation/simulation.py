@@ -39,21 +39,17 @@ class SimulationParams:
     theta : float
     freq_span: float
     freq_span_center: float = 0.0
-    overshoot: float = 0.0
+    omega_eff: float = 2*np.pi*10e3
     sweep_time: float | None = None
     t_center: float | None = None
     
     def __post_init__(self):
         if self.t_center is None:
             self.t_center = self.T / 2
-        if self.sweep_time is None:
-            self.sweep_time = (self.theta+4*np.pi)/self.omega
-        self.sweep_time = self.sweep_time + self.overshoot
-
 
     
     @classmethod
-    def from_atom(cls, T:float,dt:float, omega:float, theta:float, overshoot: float, sweep_time:float, freq_span:float, freq_span_center:float) -> "SimulationParams":
+    def from_atom(cls, T:float,dt:float, omega:float, theta:float, omega_eff: float, sweep_time:float, freq_span:float, freq_span_center:float) -> "SimulationParams":
         """
         Create parameters
         """
@@ -62,7 +58,7 @@ class SimulationParams:
             dt = dt,
             omega = omega,
             theta=theta,
-            overshoot=overshoot,
+            omega_eff=omega_eff,
             sweep_time = sweep_time,
             freq_span_center = freq_span_center,
             freq_span = freq_span,
@@ -112,7 +108,7 @@ class SimulationParams:
             'dt': self.dt,
             't_center': self.t_center,
             'omega': self.omega,
-            'overshoot': self.overshoot,
+            'omega_eff': self.omega_eff,
             'sweep_time': self.sweep_time,
             'freq_span': self.freq_span,
             'freq_span_center': self.freq_span_center,
@@ -230,7 +226,7 @@ class CompositePulse:
             "t_center": self.params.t_center,
             "theta": self.params.theta,
             "omega": self.params.omega,
-            "overshoot": self.params.overshoot,
+            "omega_eff": self.params.omega_eff,
             }
         
         # Basis states
@@ -260,7 +256,7 @@ class CompositePulse:
             return pulse_func(
                 t,
                 t_center= args['t_center'],
-                omega=args['omega'],
+                omega_eff=args['omega_eff'],
                 sweep_time=args['sweep_time'],
                 **pulse_kwargs
             )
@@ -398,7 +394,7 @@ class CompositePulse:
         times = np.linspace(0, self.params.T, n_points)
         
         amplitudes = np.array([
-            pulse_func(t, self.params.t_center, self.params.omega, 
+            pulse_func(t, self.params.t_center, self.params.omega_eff, 
                       self.params.sweep_time, **kwargs)
             for t in times
         ])

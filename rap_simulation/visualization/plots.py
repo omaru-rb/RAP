@@ -90,7 +90,7 @@ def plot_pulse_detuning_and_phase(
                   "t_center" : params.t_center, 
                   "omega" : params.omega, 
                   "theta" : params.theta,
-                  "overshoot" : params.overshoot,
+                  "omega_eff" : params.omega_eff,
                   } 
     
     # Get pulse and detuning functions

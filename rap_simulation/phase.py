@@ -109,10 +109,44 @@ def phase_BB1(
     """
     phi=np.arccos(-args['theta']/(4*np.pi))
     omega=args['omega']
-    Ttheta=args['theta']/omega + args['overshoot']/5
+    Ttheta=args['theta']/omega
     t_center=args['t_center']
     sweep_time=args['sweep_time']
-    Tpi=np.pi/omega + args['overshoot']/5
+    Tpi=np.pi/omega
+    t0 = t_center - (sweep_time)/2
+    t1 = t0 + Ttheta/2
+    t2 = t1 + Tpi
+    t3 = t2 + 2*Tpi
+    t4 = t3 + Tpi
+    t5=t4 + Ttheta/2
+
+    if t < t1:
+        return 0
+    elif t < t2:
+        return phi
+    elif t < t3:
+        return 3*phi
+    elif t < t4:
+        return phi
+    else:
+        return 0
+    
+@register_phase("asyBB1")
+def phase_asyBB1(
+    t: float,
+    args: dict,
+    **kwargs
+) -> float:
+    """
+    Asymmetrical BB1 phase profile. Consists of 4 jumps in 
+    
+    """
+    phi=np.arccos(-args['theta']/(4*np.pi))
+    omega=args['omega']
+    Ttheta=args['theta']/omega
+    t_center=args['t_center']
+    sweep_time=args['sweep_time']
+    Tpi=np.pi/omega
     t0 = t_center - (sweep_time)/2
     t1 = t0 + Ttheta
     t2 = t1 + Tpi
@@ -130,7 +164,42 @@ def phase_BB1(
     else:
         return 0
     
+@register_phase("CORPSE")
+def phase_CORPSE(
+    t: float,
+    args: dict,
+    **kwargs
+) -> float:
+    """
+    CORPSE phase profile. 
     
+    """
+    theta=args['theta']
+    omega=args['omega']
+    t_center=args['t_center']
+    sweep_time=args['sweep_time']
+    k = np.arcsin(np.sin(theta/2)/2)
+    theta1 = theta/2 + 2*np.pi - k
+    theta2 = 2*np.pi - 2*k
+    theta3 = theta/2-k
+
+    T1 = theta1/omega
+    T2 = theta2/omega
+    T3 = theta3/omega
+    
+    t0 = t_center - (T1 + T2 + T3)/2
+    t1 = t0 + T1
+    t2 = t1 + T2
+    t3 = t2 + T3
+
+    if t < t1:
+        return 0.0          # Phase 0
+    elif t < t2:
+        return np.pi        # Phase pi (180°)
+    elif t < t3:
+        return 0.0          # Phase 0
+    else:
+        return 0.0
 
 
 
